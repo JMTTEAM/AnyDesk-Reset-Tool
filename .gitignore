@@ -1,207 +1,172 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[codz]
-*$py.class
+;===============================================
+; AnyDesk Reset Utility (AutoHotkey v1)
+; Author: SoftNest Unlocker 
+;===============================================
 
-# C extensions
-*.so
+#SingleInstance Force
+#NoEnv
+SetBatchLines, -1
+SetTitleMatchMode, 2
+SetWorkingDir, %A_ScriptDir%
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+;--------------------------------
+; Global Log Variable
+;--------------------------------
+logText := ""
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+AddLog(msg) {
+    global logText
+    FormatTime, now,, yyyy-MM-dd HH:mm:ss
+    logText .= now " - " msg "`n"
+    GuiControl,, LogBox, %logText%
+}
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+;--------------------------------
+; Login GUI
+;--------------------------------
+Gui, Login:Font, s10, Segoe UI
+Gui, Login:Add, Text,, User ID:
+Gui, Login:Add, Edit, vUserID w200
+Gui, Login:Add, Text,, Password:
+Gui, Login:Add, Edit, vUserPass w200 Password
+Gui, Login:Add, Button, gCheckLogin w200, Login
+Gui, Login:Show,, Login Required
+Return
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py.cover
-.hypothesis/
-.pytest_cache/
-cover/
+CheckLogin:
+Gui, Login:Submit
+if (UserID = "admin" && UserPass = "admin")
+{
+    Gui, Login:Destroy
+    Gosub, MainGUI
+}
+else
+{
+    MsgBox, 48, Error, Incorrect User ID or Password!
+}
+Return
 
-# Translations
-*.mo
-*.pot
+;--------------------------------
+; Main GUI
+;--------------------------------
+MainGUI:
+Gui, Main:Font, s10, Segoe UI
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+; Bold Header with larger title for LunTech Support
+Gui, Main:Font, s16, Segoe UI Bold
+Gui, Main:Add, Text, x10 y10 w610 h30 Center cBlue, LunTech Support
+Gui, Main:Font, s10, Segoe UI Bold
+Gui, Main:Add, Text, x10 y50 w610 h20 Center, Developed by GSM TANVIR
 
-# Flask stuff:
-instance/
-.webassets-cache
+; Reset font to normal for the rest
+Gui, Main:Font, s10, Segoe UI
+Gui, Main:Add, Text, x10 y75 w610 h20 Center cGray, Make sure you run this tool as Administrator.
 
-# Scrapy stuff:
-.scrapy
+; Buttons on left
+Gui, Main:Add, Button, x10 y110 w200 h35 gStartAnyDesk, Start AnyDesk
+Gui, Main:Add, Button, x10 y155 w200 h35 gStopAnyDesk, Stop AnyDesk
+Gui, Main:Add, Button, x10 y200 w200 h35 gResetAnyDesk, Reset AnyDesk
 
-# Sphinx documentation
-docs/_build/
+; Log display on the right using RichEdit for blue text
+Gui, Main:Add, Edit, x220 y110 w400 h250 vLogBox ReadOnly -E0x2000 +RichEdit cBlue
 
-# PyBuilder
-.pybuilder/
-target/
+; Show GUI
+Gui, Main:Show, w640 h380 Center, AnyDesk Reset Tool [Beta]
+Return
 
-# Jupyter Notebook
-.ipynb_checkpoints
+;--------------------------------
+; Open Link
+;--------------------------------
+OpenLink:
+Run, https://luntechsupport.com/
+Return
 
-# IPython
-profile_default/
-ipython_config.py
+;--------------------------------
+; Stop AnyDesk
+;--------------------------------
+StopAnyDesk:
+AddLog("Stopping AnyDesk...")
+RunWait, sc stop AnyDesk,, Hide
+RunWait, taskkill /f /im "AnyDesk.exe",, Hide
+AddLog("AnyDesk stopped successfully.")
+MsgBox, 64, Success, AnyDesk stopped successfully!
+Return
 
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
+;--------------------------------
+; Start AnyDesk
+;--------------------------------
+StartAnyDesk:
+AddLog("Starting AnyDesk...")
+RunWait, sc start AnyDesk,, Hide
+if FileExist("C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe")
+{
+    Run, "C:\\Program Files (x86)\\AnyDesk\\AnyDesk.exe"
+    AddLog("AnyDesk launched.")
+}
+else if FileExist("C:\\Program Files\\AnyDesk\\AnyDesk.exe")
+{
+    Run, "C:\\Program Files\\AnyDesk\\AnyDesk.exe"
+    AddLog("AnyDesk launched.")
+}
+else
+{
+    AddLog("AnyDesk executable not found!")
+    MsgBox, 48, Error, AnyDesk executable not found!
+}
+Return
 
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
+;--------------------------------
+; Reset AnyDesk
+;--------------------------------
+ResetAnyDesk:
+AddLog("Reset process started...")
+MsgBox, 36, Confirm, This will delete AnyDesk configuration and reset IDs.`nDo you want to continue?
+IfMsgBox, No
+    Return
 
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
+Gosub, StopAnyDesk
+Sleep, 1000
 
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-#poetry.toml
+EnvGet, allUsersProfile, ALLUSERSPROFILE
+EnvGet, appData, APPDATA
+EnvGet, tempDir, TEMP
 
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
-#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
-#pdm.lock
-#pdm.toml
-.pdm-python
-.pdm-build/
+FileDelete, %allUsersProfile%\AnyDesk\service.conf
+FileDelete, %appData%\AnyDesk\service.conf
+FileCopy, %appData%\AnyDesk\user.conf, %tempDir%\user.conf, 1
+AddLog("Config files deleted and user.conf backed up.")
 
-# pixi
-#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
-#pixi.lock
-#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
-#   in the .venv directory. It is recommended not to include this directory in version control.
-.pixi
+RunWait, xcopy /c /e /h /r /y /i /k "%appData%\AnyDesk\thumbnails" "%tempDir%\thumbnails",, Hide
+AddLog("Thumbnails backed up.")
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
+FileDelete, %allUsersProfile%\AnyDesk\*.*
+FileDelete, %appData%\AnyDesk\*.*
+AddLog("All config files cleared.")
 
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
+Gosub, StartAnyDesk
+Sleep, 3000
 
-# SageMath parsed files
-*.sage.py
+Loop
+{
+    if FileExist(allUsersProfile "\\AnyDesk\\system.conf")
+        Break
+    Sleep, 500
+}
 
-# Environments
-.env
-.envrc
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+Gosub, StopAnyDesk
+FileMove, %tempDir%\user.conf, %appData%\AnyDesk\user.conf, 1
+RunWait, xcopy /c /e /h /r /y /i /k "%tempDir%\thumbnails" "%appData%\AnyDesk\thumbnails",, Hide
+FileRemoveDir, %tempDir%\thumbnails, 1
 
-# Spyder project settings
-.spyderproject
-.spyproject
+AddLog("Configurations restored.")
 
-# Rope project settings
-.ropeproject
+Gosub, StartAnyDesk
+MsgBox, 64, Done, AnyDesk reset completed successfully!
+AddLog("Reset completed successfully.")
+Return
 
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
-
-# Abstra
-# Abstra is an AI-powered process automation framework.
-# Ignore directories containing user credentials, local state, and settings.
-# Learn more at https://abstra.io/docs
-.abstra/
-
-# Visual Studio Code
-#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
-#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
-#  and can be added to the global gitignore or merged into this file. However, if you prefer, 
-#  you could uncomment the following to ignore the entire vscode folder
-# .vscode/
-
-# Ruff stuff:
-.ruff_cache/
-
-# PyPI configuration file
-.pypirc
-
-# Cursor
-#  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
-#  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
-#  refer to https://docs.cursor.com/context/ignore-files
-.cursorignore
-.cursorindexingignore
-
-# Marimo
-marimo/_static/
-marimo/_lsp/
-__marimo__/
+;--------------------------------
+; Exit
+;--------------------------------
+GuiClose:
+ExitApp
